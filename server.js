@@ -1,4 +1,5 @@
 
+const fs = require("fs");
 const express = require("express");
 const path = require("path");
 const Database = require("better-sqlite3");
@@ -21,13 +22,20 @@ app.use(express.urlencoded({ extended: true }));
 // SESSION CONFIGURATION
 // ========================================
 
+// Trust Render's proxy when running in production
+if (process.env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+}
+
+// Session configuration
 app.use(session({
     secret: process.env.SESSION_SECRET || "development-secret-change-this",
     resave: false,
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
-        secure: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
         maxAge: 1000 * 60 * 60
     }
 }));
@@ -41,9 +49,8 @@ app.use(express.static(path.join(__dirname, "public")));
 
 const dbPath = path.join(__dirname, "database", "website.db");
 
-// Connect to the SQLite database.
-// SQLite creates the database file if it does not exist,
-// provided the database folder already exists.
+fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+
 const db = new Database(dbPath);
 
 console.log("SQLite database connected successfully!");
@@ -80,6 +87,29 @@ db.exec(`
 `);
 
 console.log("Users table is ready!");
+
+// Create the initial admin account when configured through environment variables
+const adminUsername = process.env.ADMIN_USERNAME;
+const adminPassword = process.env.ADMIN_PASSWORD;
+
+if (adminUsername && adminPassword) {
+    const existingAdmin = db.prepare(`
+        SELECT id FROM users WHERE username = ?
+    `).get(adminUsername);
+
+    if (!existingAdmin) {
+        const passwordHash = bcrypt.hashSync(adminPassword, 10);
+
+        db.prepare(`
+            INSERT INTO users (username, password_hash)
+            VALUES (?, ?)
+        `).run(adminUsername, passwordHash);
+
+        console.log("Initial admin account created.");
+    } else {
+        console.log("Configured admin account already exists.");
+    }
+}
 
 // ========================================
 // 4. TEST API
