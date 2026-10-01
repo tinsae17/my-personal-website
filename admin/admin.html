@@ -1,267 +1,309 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+```
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Admin Dashboard</title>
+<title>Admin Dashboard</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background: #f4f6f8;
-            color: #333;
-        }
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #f4f6f8;
+        color: #333;
+    }
 
-        header {
-            background: #222;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
+    header {
+        background: #222;
+        color: white;
+        padding: 20px;
+        text-align: center;
+    }
 
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 30px auto;
-        }
+    .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 30px auto;
+    }
 
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
 
-        .dashboard-header h2 {
-            margin: 0;
-        }
+    .dashboard-header h2 {
+        margin: 0;
+    }
 
-        button {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+    button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
 
-        button:hover {
-            background: #0056b3;
-        }
+    button:hover {
+        background: #0056b3;
+    }
 
-        .table-container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            overflow-x: auto;
-        }
+    .table-container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-        th,
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
+    th,
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
 
-        th {
-            background: #f1f1f1;
-        }
+    th {
+        background: #f1f1f1;
+    }
 
-        tr:hover {
-            background: #f8f8f8;
-        }
+    tr:hover {
+        background: #f8f8f8;
+    }
 
-        .status {
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
+    .status {
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
 
-        .empty {
-            text-align: center;
-            padding: 30px;
-            color: #777;
-        }
-    </style>
+    .empty {
+        text-align: center;
+        padding: 30px;
+        color: #777;
+    }
+</style>
+```
+
 </head>
 
 <body>
 
-    <header>
-     <div style="display: flex; justify-content: space-between; align-items: center;">
+```
+<header>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
         <h1>Admin Dashboard</h1>
 
         <button id="logoutButton">
             Logout
         </button>
     </div>
-        <p>Contact Messages</p>
-    </header>
 
-    <main class="container">
+    <p>Contact Messages</p>
+</header>
 
-        <div class="dashboard-header">
+<main class="container">
 
-            <h2>Messages</h2>
+    <div class="dashboard-header">
 
-            <button onclick="loadMessages()">
-                Refresh Messages
-            </button>
+        <h2>Messages</h2>
 
-        </div>
+        <button onclick="loadMessages()">
+            Refresh Messages
+        </button>
 
-        <div id="status" class="status">
-            Loading messages...
-        </div>
+    </div>
 
-        <div class="table-container">
+    <div id="status" class="status">
+        Loading messages...
+    </div>
 
-            <table>
+    <div class="table-container">
 
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Message</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
+        <table>
 
-                <tbody id="messagesTableBody">
-                </tbody>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Message</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
 
-            </table>
+            <tbody id="messagesTableBody">
+            </tbody>
 
-        </div>
+        </table>
 
-    </main>
+    </div>
 
+</main>
 
-    <script>
+<script>
 
-        // ========================================
-        // LOAD MESSAGES FROM EXPRESS API
-        // ========================================
+    // ========================================
+    // LOAD MESSAGES FROM EXPRESS API
+    // ========================================
 
-        async function loadMessages() {
+    async function loadMessages() {
 
-            const status = document.getElementById("status");
-            const tableBody = document.getElementById("messagesTableBody");
+        const status =
+            document.getElementById("status");
 
-            status.textContent = "Loading messages...";
+        const tableBody =
+            document.getElementById("messagesTableBody");
 
-            try {
+        status.textContent = "Loading messages...";
 
-                const response = await fetch("/api/messages");
+        try {
 
-                const data = await response.json();
+            const response =
+                await fetch("/api/messages", {
+                    cache: "no-store"
+                });
 
-                if (!data.success) {
+            if (!response.ok) {
 
-                    throw new Error(data.message);
-
-                }
-
-                tableBody.innerHTML = "";
-
-                if (data.messages.length === 0) {
-
-                    tableBody.innerHTML = `
-                        <tr>
-                            <td colspan="5" class="empty">
-                                No messages found.
-                            </td>
-                        </tr>
-                    `;
-
-                    status.textContent = "No messages available.";
-
+                if (response.status === 401) {
+                    window.location.href = "/login.html";
                     return;
                 }
 
-                data.messages.forEach(message => {
-
-                    const row = document.createElement("tr");
-
-                    row.innerHTML = `
-                        <td>${message.id}</td>
-                        <td>${message.name}</td>
-                        <td>${message.email}</td>
-                        <td>${message.message}</td>
-                        <td>${message.created_at}</td>
-                    `;
-
-                    tableBody.appendChild(row);
-
-                });
-
-                status.textContent =
-                    `${data.messages.length} message(s) found.`;
-
-            } catch (error) {
-
-                console.error(error);
-
-                status.textContent =
-                    "Error loading messages.";
-
+                throw new Error(
+                    `Server returned ${response.status}`
+                );
             }
+
+            const messages =
+                await response.json();
+
+            tableBody.innerHTML = "";
+
+            if (!Array.isArray(messages)) {
+                throw new Error(
+                    "Unexpected response format."
+                );
+            }
+
+            if (messages.length === 0) {
+
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty">
+                            No messages found.
+                        </td>
+                    </tr>
+                `;
+
+                status.textContent =
+                    "No messages available.";
+
+                return;
+            }
+
+            messages.forEach(message => {
+
+                const row =
+                    document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${message.id}</td>
+                    <td>${message.name}</td>
+                    <td>${message.email}</td>
+                    <td>${message.message}</td>
+                    <td>${new Date(message.created_at).toLocaleString()}</td>
+                `;
+
+                tableBody.appendChild(row);
+
+            });
+
+            status.textContent =
+                `${messages.length} message(s) found.`;
+
+        } catch (error) {
+
+            console.error(
+                "Error loading messages:",
+                error
+            );
+
+            status.textContent =
+                "Error loading messages.";
         }
+    }
 
 
-        // Load messages when page opens
-        loadMessages();
-
-    </script>
-
-<script>
+    // ========================================
+    // LOGOUT
+    // ========================================
 
     const logoutButton =
         document.getElementById("logoutButton");
 
-    logoutButton.addEventListener("click", async () => {
+    logoutButton.addEventListener(
+        "click",
+        async () => {
 
-        try {
+            try {
 
-            const response = await fetch(
-                "/api/logout",
-                {
-                    method: "POST"
+                const response =
+                    await fetch(
+                        "/api/logout",
+                        {
+                            method: "POST"
+                        }
+                    );
+
+                const data =
+                    await response.json();
+
+                if (data.success) {
+
+                    window.location.href =
+                        "/login.html";
+
+                } else {
+
+                    alert(data.message);
                 }
-            );
 
-            const data = await response.json();
+            } catch (error) {
 
-            if (data.success) {
+                console.error(
+                    "Logout error:",
+                    error
+                );
 
-                window.location.href = "/login.html";
-
-            } else {
-
-                alert(data.message);
-
+                alert(
+                    "Unable to logout."
+                );
             }
-
-        } catch (error) {
-
-            console.error("Logout error:", error);
-
-            alert("Unable to logout.");
-
         }
+    );
 
-    });
+
+    // ========================================
+    // LOAD MESSAGES WHEN PAGE OPENS
+    // ========================================
+
+    loadMessages();
 
 </script>
+```
 
 </body>
 
