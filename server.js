@@ -5,7 +5,7 @@ const path = require("path");
 const bcrypt = require("bcrypt");
 const session = require("express-session");
 const { Pool } = require("pg");
-
+const nodemailer = require("nodemailer");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -57,6 +57,14 @@ if (!process.env.DATABASE_URL) {
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL
+});
+
+const emailTransporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
 });
 
 pool.on("error", (error) => {
@@ -121,6 +129,15 @@ app.get("/admin.html", requireLogin, (req, res) => {
 // 10. CONTACT FORM
 // ========================================
 
+function escapeHtml(text) {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 app.post("/api/contact", async (req, res) => {
     try {
         const { name, email, message } = req.body;
@@ -141,6 +158,10 @@ app.post("/api/contact", async (req, res) => {
         const cleanEmail = email.trim();
         const cleanMessage = message.trim();
 
+        const safeName = escapeHtml(cleanName);
+        const safeEmail = escapeHtml(cleanEmail);
+        const safeMessage = escapeHtml(cleanMessage);
+
         if (!cleanName || !cleanEmail || !cleanMessage) {
             return res.status(400).json({
                 success: false,
@@ -148,7 +169,7 @@ app.post("/api/contact", async (req, res) => {
             });
         }
 
-        // Save message to PostgreSQL
+        // Save message to PostgreSQL first
         await pool.query(
             `
             INSERT INTO messages
@@ -158,6 +179,41 @@ app.post("/api/contact", async (req, res) => {
             `,
             [cleanName, cleanEmail, cleanMessage]
         );
+
+        // Send email notification
+        try {
+            await emailTransporter.sendMail({
+                from: `"Personal Website" <${process.env.EMAIL_USER}>`,
+                to: process.env.EMAIL_TO,
+                replyTo: cleanEmail,
+                subject: `New Contact Message from ${cleanName}`,
+                text: `
+You received a new message from your personal website.
+
+Name: ${cleanName}
+Email: ${cleanEmail}
+
+Message:
+${cleanMessage}
+                `,
+                html: `
+                    <h2>New Contact Message</h2>
+
+                    <p><strong>Name:</strong> ${safeName}</p>
+                    <p><strong>Email:</strong> ${safeEmail}</p>
+
+                    <p><strong>Message:</strong></p>
+                    <p>${safeMessage.replace(/\n/g, "<br>")}</p>
+                `
+            });
+
+            console.log("Contact notification email sent successfully.");
+
+        } catch (emailError) {
+            // Message is already safely stored in PostgreSQL.
+            // Email failure should not cause the contact submission to fail.
+            console.error("Email notification failed:", emailError);
+        }
 
         res.json({
             success: true,
